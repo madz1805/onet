@@ -5,7 +5,7 @@ import { SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
 
-// Cadangan: endpoint DeepSeek milik sendiri (koyen-api.vercel.app).
+// Sumber utama: endpoint DeepSeek milik sendiri (koyen-api.vercel.app).
 // Sama seperti Logic Bell, API ini menyimpan memori percakapan per `session`
 // (dikirim dari client sebagai sessionId), jadi obrolan tetap nyambung.
 async function callDeepSeek(message, sessionId) {
@@ -27,9 +27,9 @@ async function callDeepSeek(message, sessionId) {
   return reply;
 }
 
-// Sumber utama: Logic Bell (api.termai.cc), host yang sama juga dipakai
-// downloader Instagram & maker iqc di project ini jadi kemungkinan besar
-// tidak diblokir firewall macam api-faa.my.id.
+// Cadangan kalau DeepSeek gagal: Logic Bell (api.termai.cc), host yang sama
+// juga dipakai downloader Instagram & maker iqc di project ini jadi
+// kemungkinan besar tidak diblokir firewall macam api-faa.my.id.
 // Bawaannya API ini punya memori percakapan per `id` sesi (dikirim dari
 // client sebagai sessionId), tapi tetap jalan tanpa itu kalau tidak dikirim.
 async function callLogicBell(message, sessionId) {
@@ -77,9 +77,9 @@ export async function POST(req) {
   }
 
   try {
-    const reply = await callLogicBell(message, sessionId).catch((err) => {
-      console.error("[chat] Logic Bell gagal, coba DeepSeek:", err.message);
-      return callDeepSeek(message, sessionId);
+    const reply = await callDeepSeek(message, sessionId).catch((err) => {
+      console.error("[chat] DeepSeek gagal, coba Logic Bell:", err.message);
+      return callLogicBell(message, sessionId);
     });
     return NextResponse.json({ status: true, reply });
   } catch (err) {
