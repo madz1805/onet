@@ -5,73 +5,31 @@ import { SITE_NAME } from "@/lib/site";
 
 export const runtime = "nodejs";
 
-// Model per catatan resmi Gemini: gemini-2.0-flash (dkk) sudah dimatikan
-// per 1 Juni 2026. gemini-3.1-flash-lite dipakai sebagai cadangan kedua
-// kalau gemini-3.5-flash lagi overload (dua model beda jarang overload
-// bareng di waktu yang sama).
-const GEMINI_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
-
-function isOverloadedError(message) {
-  return /high demand|overloaded|503|UNAVAILABLE/i.test(message || "");
-}
-
-async function callGemini(model, message, apiKey) {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: CHAT_SYSTEM_PROMPT }] },
-        contents: [{ role: "user", parts: [{ text: message }] }],
-        generationConfig: { maxOutputTokens: 512 },
-      }),
-      signal: AbortSignal.timeout(20000),
-    }
-  );
+// Cadangan: endpoint DeepSeek milik sendiri (koyen-api.vercel.app).
+// Sama seperti Logic Bell, API ini menyimpan memori percakapan per `session`
+// (dikirim dari client sebagai sessionId), jadi obrolan tetap nyambung.
+async function callDeepSeek(message, sessionId) {
+  const params = new URLSearchParams({
+    query: message,
+    prompt: CHAT_SYSTEM_PROMPT,
+    session: sessionId || `web-${Date.now()}`,
+  });
+  const res = await fetch(`https://koyen-api.vercel.app/download/deepseek?${params.toString()}`, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(25000),
+  });
 
   const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    throw new Error(data?.error?.message || `status ${res.status}`);
+  const reply = typeof data?.data?.answer === "string" ? data.data.answer.trim() : "";
+  if (!res.ok || !data?.status || !reply) {
+    throw new Error(data?.message || data?.msg || `DeepSeek tidak mengembalikan jawaban (status ${res.status}).`);
   }
-
-  const reply = data?.candidates?.[0]?.content?.parts
-    ?.map((p) => p.text || "")
-    .join("")
-    .trim();
-  if (!reply) throw new Error("Gemini tidak mengembalikan teks jawaban (mungkin kena safety filter).");
   return reply;
 }
 
-// Coba tiap model di GEMINI_MODELS berurutan; retry sekali per model kalau
-// errornya "lagi overload" (biasanya cuma sebentar), baru pindah ke model
-// berikutnya kalau masih gagal juga.
-async function askGemini(message) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY belum diatur di environment variable.");
-
-  let lastErr;
-  for (const model of GEMINI_MODELS) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        return await callGemini(model, message, apiKey);
-      } catch (err) {
-        lastErr = err;
-        console.error(`[chat] ${model} percobaan ${attempt + 1} gagal:`, err.message);
-        if (!isOverloadedError(err.message)) break; // error selain overload, langsung pindah model
-        await new Promise((r) => setTimeout(r, 800));
-      }
-    }
-  }
-  throw lastErr;
-}
-
-// Cadangan kalau kedua model Gemini gagal — pakai Logic Bell (api.termai.cc),
-// host yang sama juga dipakai downloader Instagram & maker iqc di project
-// ini jadi kemungkinan besar tidak diblokir firewall macam api-faa.my.id.
+// Sumber utama: Logic Bell (api.termai.cc), host yang sama juga dipakai
+// downloader Instagram & maker iqc di project ini jadi kemungkinan besar
+// tidak diblokir firewall macam api-faa.my.id.
 // Bawaannya API ini punya memori percakapan per `id` sesi (dikirim dari
 // client sebagai sessionId), tapi tetap jalan tanpa itu kalau tidak dikirim.
 async function callLogicBell(message, sessionId) {
@@ -120,8 +78,8 @@ export async function POST(req) {
 
   try {
     const reply = await callLogicBell(message, sessionId).catch((err) => {
-      console.error("[chat] Logic Bell gagal, coba Gemini:", err.message);
-      return askGemini(message);
+      console.error("[chat] Logic Bell gagal, coba DeepSeek:", err.message);
+      return callDeepSeek(message, sessionId);
     });
     return NextResponse.json({ status: true, reply });
   } catch (err) {
@@ -133,6 +91,3 @@ export async function POST(req) {
     );
   }
 }
-
-
-
