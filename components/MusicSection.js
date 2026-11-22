@@ -9,6 +9,7 @@ import {
   Trash2,
   Volume2,
   ListPlus,
+  ArrowRight,
   X,
 } from "lucide-react";
 import { makeTrackId } from "@/lib/musicHistory";
@@ -73,13 +74,13 @@ function Card({ cover, title, subtitle, onPlay, busy, active, disabled, actions 
               alt=""
               referrerPolicy="no-referrer"
               loading="lazy"
-              className={`aspect-square w-full rounded-2xl border object-cover ${
+              className={`aspect-square w-full rounded-xl border object-cover ${
                 active ? "border-signal-500" : "border-white/10"
               } ${disabled && !busy ? "opacity-50" : ""}`}
             />
           ) : (
             <span
-              className={`grid aspect-square w-full place-items-center rounded-2xl border bg-ink-900/60 text-white/30 ${
+              className={`grid aspect-square w-full place-items-center rounded-xl border bg-ink-800/70 text-white/30 ${
                 active ? "border-signal-500" : "border-white/10"
               }`}
             >
@@ -87,7 +88,7 @@ function Card({ cover, title, subtitle, onPlay, busy, active, disabled, actions 
             </span>
           )}
           {busy && (
-            <span className="absolute inset-0 grid place-items-center rounded-2xl bg-black/50 text-white">
+            <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/50 text-white">
               <Loader2 size={22} className="animate-spin" />
             </span>
           )}
@@ -164,6 +165,7 @@ export default function MusicSection() {
     const q = text.trim();
     if (!q) return;
     const seq = ++searchSeq.current;
+    setTab("cari");
     setLoading(true);
     setError("");
     setResults([]);
@@ -299,9 +301,68 @@ export default function MusicSection() {
   return (
     // pb-24: ruang untuk mini player yang menempel di bawah layar selama ada lagu.
     <div className={track ? "pb-24" : ""}>
-      <div className="mb-4 flex rounded-xl border border-white/10 bg-ink-900/60 p-1" role="tablist">
+      <form onSubmit={handleSearch}>
+        <div className="relative">
+          <Search size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+          <input
+            ref={searchInputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Cari di ${sourceLabel(source)}...`}
+            enterKeyHint="search"
+            className={`w-full rounded-xl border border-white/10 bg-ink-900/60 py-3 pl-11 text-sm text-white placeholder:text-white/30 focus-ring ${
+              query ? "pr-[5.25rem]" : "pr-4"
+            }`}
+          />
+          {query && (
+            <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  searchInputRef.current?.focus();
+                }}
+                aria-label="Hapus teks pencarian"
+                title="Hapus"
+                className="grid h-8 w-8 place-items-center rounded-full text-white/50 hover:text-white"
+              >
+                <X size={16} />
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                aria-label="Cari"
+                title="Cari"
+                className="grid h-8 w-8 place-items-center rounded-full bg-signal-500 text-ink-950 disabled:opacity-60"
+              >
+                {loading ? <Loader2 size={15} className="animate-spin" /> : <ArrowRight size={16} />}
+              </button>
+            </div>
+          )}
+        </div>
+      </form>
+
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Pilih sumber lagu">
+        {SOURCES.map((s) => (
+          <button
+            type="button"
+            key={s.id}
+            onClick={() => changeSource(s.id)}
+            aria-pressed={source === s.id}
+            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              source === s.id
+                ? "border-signal-500 bg-signal-500 text-ink-950"
+                : "border-white/10 bg-ink-900/60 text-white/70 hover:text-white"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-2 mt-3 flex rounded-xl border border-white/10 bg-ink-900/60 p-1" role="tablist">
         {[
-          { id: "cari", label: "Cari" },
+          { id: "cari", label: "Beranda" },
           { id: "playlist", label: "Playlist" },
         ].map((t) => (
           <button
@@ -318,56 +379,6 @@ export default function MusicSection() {
           </button>
         ))}
       </div>
-
-      {tab === "cari" && (
-      <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex rounded-xl border border-white/10 bg-ink-900/60 p-1">
-          {SOURCES.map((s) => (
-            <button
-              type="button"
-              key={s.id}
-              onClick={() => changeSource(s.id)}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                source === s.id ? "bg-signal-500 text-ink-950" : "text-white/60 hover:text-white"
-              }`}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <div className="relative flex-1">
-          <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
-          <input
-            ref={searchInputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari judul lagu atau nama artis..."
-            className="w-full rounded-xl border border-white/10 bg-ink-900/60 py-3 pl-11 pr-11 text-sm text-white placeholder:text-white/30 focus-ring"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                searchInputRef.current?.focus();
-              }}
-              aria-label="Hapus teks pencarian"
-              title="Hapus"
-              className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-white/50 hover:text-white"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-xl bg-signal-500 px-6 py-3 text-sm font-semibold text-ink-950 disabled:opacity-60"
-        >
-          {loading ? <Loader2 size={16} className="animate-spin" /> : "Cari"}
-        </button>
-      </form>
-      )}
 
       {refreshing && !error && (
         <p className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
@@ -520,18 +531,20 @@ export default function MusicSection() {
                     onClick={() => setAddTarget(t)}
                     aria-label={`Tambah ${t.title} ke playlist`}
                     title="Tambah ke playlist"
-                    className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80"
+                    className="grid h-8 w-8 place-items-center rounded-full border-2"
+                    style={{ background: "#fff", color: "#111", borderColor: "#111" }}
                   >
-                    <ListPlus size={14} />
+                    <ListPlus size={16} strokeWidth={2.4} />
                   </button>
                   <button
                     type="button"
                     onClick={() => removeFromHistory(t.id)}
                     aria-label={`Hapus ${t.title} dari riwayat`}
                     title="Hapus dari riwayat"
-                    className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white hover:bg-flare-500"
+                    className="grid h-8 w-8 place-items-center rounded-full border-2"
+                    style={{ background: "#fff", color: "#d11a1a", borderColor: "#111" }}
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={15} strokeWidth={2.4} />
                   </button>
                 </>
               }
