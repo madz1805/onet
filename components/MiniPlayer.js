@@ -72,8 +72,9 @@ export default function MiniPlayer() {
       <div
         className={
           onMusicPage
-            ? // Di halaman Musik: menempel di bawah layar (di atas area gesture HP).
-              "pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-center px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]"
+            ? // Di halaman Musik: menempel di bawah layar. Di HP posisinya di ATAS tab bar
+              // mengambang (tinggi tab bar + jarak ~92px); di desktop tidak ada tab bar.
+              "pointer-events-none fixed inset-x-0 bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] z-30 flex justify-center px-4 md:bottom-0 md:pb-3"
             : // top-[72px] = tinggi navbar (h-16 = 64px) + jarak 8px. Fixed supaya tetap
               // terlihat walau halaman di-scroll; pointer-events-none di pembungkus agar
               // area kosong di kiri/kanan kartu tidak menghalangi klik ke konten.
