@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Search,
   Play,
   Loader2,
   Music2,
   Trash2,
-  History,
   Volume2,
   ListPlus,
-  ChevronDown,
   X,
 } from "lucide-react";
 import { makeTrackId } from "@/lib/musicHistory";
+import trending from "@/data/trending.json";
 import PlaylistTab from "@/components/PlaylistTab";
 import AddToPlaylistModal from "@/components/AddToPlaylistModal";
 import usePlaylists from "@/lib/usePlaylists";
@@ -38,15 +37,91 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
-const HISTORY_OPEN_KEY = "koyen-music-history-open";
-const HISTORY_VISIBLE_ROWS = 5; // baris riwayat yang tampil sebelum perlu di-scroll
+// Daftar lagu untuk baris-baris kotak album di tab Cari, diisi manual lewat
+// data/trending.json. Section tanpa lagu tidak ditampilkan.
+const SECTIONS = (Array.isArray(trending?.sections) ? trending.sections : [])
+  .map((sec) => ({
+    title: sec?.title || "",
+    items: (Array.isArray(sec?.items) ? sec.items : []).filter((it) => it && it.title),
+  }))
+  .filter((sec) => sec.title && sec.items.length > 0);
+
+// Satu baris kotak yang bisa digeser ke samping (gaya daftar Spotify).
+function CardRow({ title, count, children }) {
+  return (
+    <section className="mt-8">
+      <h2 className="mb-3 flex items-center gap-2 font-display text-base font-semibold text-white">
+        {title}
+        {count != null && (
+          <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">{count}</span>
+        )}
+      </h2>
+      <div className="-mx-5 flex snap-x gap-3 overflow-x-auto overscroll-x-contain px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+// Satu kotak: cover persegi + judul + artis. `actions` (opsional) tampil di
+// pojok kanan atas cover, mis. tombol tambah ke playlist / hapus.
+function Card({ cover, title, subtitle, onPlay, busy, active, disabled, actions }) {
+  return (
+    <div className="w-32 flex-shrink-0 snap-start">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onPlay}
+          disabled={disabled}
+          aria-label={`Putar ${title}`}
+          className="block w-full text-left disabled:cursor-wait"
+        >
+          {cover ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={cover}
+              alt=""
+              referrerPolicy="no-referrer"
+              loading="lazy"
+              className={`aspect-square w-full rounded-2xl border object-cover ${
+                active ? "border-signal-500" : "border-white/10"
+              } ${disabled && !busy ? "opacity-50" : ""}`}
+            />
+          ) : (
+            <span
+              className={`grid aspect-square w-full place-items-center rounded-2xl border bg-ink-900/60 text-white/30 ${
+                active ? "border-signal-500" : "border-white/10"
+              }`}
+            >
+              <Music2 size={28} />
+            </span>
+          )}
+          {busy && (
+            <span className="absolute inset-0 grid place-items-center rounded-2xl bg-black/50 text-white">
+              <Loader2 size={22} className="animate-spin" />
+            </span>
+          )}
+          {active && !busy && (
+            <span className="absolute bottom-1.5 left-1.5 grid h-7 w-7 place-items-center rounded-full bg-signal-500 text-ink-950">
+              <Volume2 size={14} />
+            </span>
+          )}
+        </button>
+        {actions && <div className="absolute right-1.5 top-1.5 flex flex-col gap-1">{actions}</div>}
+      </div>
+      <p
+        className="mt-2 break-words text-sm font-medium leading-snug text-white"
+        style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+      >
+        {title}
+      </p>
+      <p className="truncate text-xs text-white/50">{subtitle}</p>
+    </div>
+  );
+}
 
 export default function MusicSection() {
   const [source, setSource] = useState("spotify");
-  // Kotak Riwayat: bisa diminimalkan / dibesarkan (pilihan diingat di perangkat).
-  const [histOpen, setHistOpen] = useState(true);
-  const [histMax, setHistMax] = useState(null); // tinggi maksimal daftar = 5 baris (px)
-  const histRef = useRef(null);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -74,49 +149,6 @@ export default function MusicSection() {
     addAndPlay,
     removeFromHistory,
   } = useMusicPlayer();
-
-  useEffect(() => {
-    try {
-      if (window.localStorage.getItem(HISTORY_OPEN_KEY) === "0") setHistOpen(false);
-    } catch {
-      // abaikan
-    }
-  }, []);
-
-  function toggleHistory() {
-    setHistOpen((v) => {
-      try {
-        window.localStorage.setItem(HISTORY_OPEN_KEY, v ? "0" : "1");
-      } catch {
-        // abaikan
-      }
-      return !v;
-    });
-  }
-
-  // Tinggi daftar riwayat dibatasi tepat 5 baris (diukur dari baris aslinya, jadi
-  // pas di semua tema); lebih dari itu bisa di-scroll.
-  useEffect(() => {
-    const el = histRef.current;
-    if (!histOpen || !el) return;
-    const measure = () => {
-      const kids = el.children;
-      if (kids.length <= HISTORY_VISIBLE_ROWS) {
-        setHistMax(null);
-        return;
-      }
-      // + padding atas/bawah daftar (2px + 6px) - jarak antar baris (8px) = +0
-      setHistMax(kids[HISTORY_VISIBLE_ROWS].offsetTop - kids[0].offsetTop);
-    };
-    measure();
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
-    if (ro) Array.from(el.children).slice(0, HISTORY_VISIBLE_ROWS + 1).forEach((c) => ro.observe(c));
-    window.addEventListener("resize", measure);
-    return () => {
-      ro?.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, [histOpen, history.length, history[0]?.id, tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function runSearch(src = source, text = query) {
     const q = text.trim();
@@ -162,35 +194,75 @@ export default function MusicSection() {
     }
   }
 
+  // Ambil link stream sebuah hasil pencarian, lalu putar. Melempar error kalau gagal.
+  async function playResolved(item, src, q) {
+    const res = await fetch("/api/music", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "resolve", source: src, url: item.url, query: item.query, artist: item.artist }),
+    });
+    const data = await res.json();
+    if (!data.status || !data.streamUrl) throw new Error(data.message || "Gagal mengambil lagu.");
+
+    const title = item.title || data.title;
+    const artist = item.artist || data.artist || "";
+    addAndPlay({
+      id: makeTrackId({ source: src, title, artist }),
+      source: src,
+      title,
+      artist,
+      thumbnail: item.thumbnail || data.thumbnail || null,
+      streamUrl: data.streamUrl,
+      duration: item.duration || data.duration || null, // dipakai kalau stream tidak melaporkan panjang lagu
+      query: q,
+      pageUrl: item.url, // dipakai pemutar untuk mengambil ulang link yang kedaluwarsa
+      searchQuery: item.query,
+      resolvedAt: Date.now(),
+    });
+  }
+
   // Lagu dipilih dari daftar hasil: ambil link stream-nya, lalu putar.
   async function handlePick(item) {
     if (resolvingUrl) return;
     setResolvingUrl(item.url);
     setError("");
     try {
+      await playResolved(item, source, searchedQuery);
+    } catch (err) {
+      setError(err.message || "Gagal mengambil lagu.");
+    } finally {
+      setResolvingUrl(null);
+    }
+  }
+
+  // Kotak dari data/trending.json diketuk: cari "judul artis" di sumber yang
+  // sedang dipilih, ambil hasil teratas, lalu putar. Cover & judul tetap
+  // memakai yang tertulis di file supaya sama dengan yang terlihat di kotak.
+  async function handleCardPick(item, key) {
+    if (resolvingUrl) return;
+    const src = SOURCES.some((s) => s.id === item.source) ? item.source : source;
+    const q = (item.query || `${item.title} ${item.artist || ""}`).trim();
+    setResolvingUrl(key);
+    setError("");
+    try {
       const res = await fetch("/api/music", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "resolve", source, url: item.url, query: item.query, artist: item.artist }),
+        body: JSON.stringify({ action: "search", source: src, query: q }),
       });
       const data = await res.json();
-      if (!data.status || !data.streamUrl) throw new Error(data.message || "Gagal mengambil lagu.");
-
-      const title = item.title || data.title;
-      const artist = item.artist || data.artist || "";
-      addAndPlay({
-        id: makeTrackId({ source, title, artist }),
-        source,
-        title,
-        artist,
-        thumbnail: item.thumbnail || data.thumbnail || null,
-        streamUrl: data.streamUrl,
-        duration: item.duration || data.duration || null, // dipakai kalau stream tidak melaporkan panjang lagu
-        query: searchedQuery,
-        pageUrl: item.url, // dipakai pemutar untuk mengambil ulang link yang kedaluwarsa
-        searchQuery: item.query,
-        resolvedAt: Date.now(),
-      });
+      const first = Array.isArray(data.results) ? data.results[0] : null;
+      if (!data.status || !first) throw new Error(data.message || "Lagu tidak ditemukan.");
+      await playResolved(
+        {
+          ...first,
+          title: item.title || first.title,
+          artist: item.artist || first.artist,
+          thumbnail: item.cover || first.thumbnail,
+        },
+        src,
+        q
+      );
     } catch (err) {
       setError(err.message || "Gagal mengambil lagu.");
     } finally {
@@ -380,7 +452,7 @@ export default function MusicSection() {
         </div>
       )}
 
-      {tab === "cari" && !track && !error && !playbackError && history.length === 0 && results.length === 0 && !loading && (
+      {tab === "cari" && !track && !error && !playbackError && history.length === 0 && results.length === 0 && !loading && SECTIONS.length === 0 && (
         <div className="mt-14 flex flex-col items-center gap-3 text-center text-white/40">
           <Music2 size={32} />
           <p className="max-w-sm text-sm">
@@ -396,86 +468,66 @@ export default function MusicSection() {
         </div>
       )}
 
+      {tab === "cari" && results.length === 0 && !loading &&
+        SECTIONS.map((sec, si) => (
+          <CardRow key={`${si}-${sec.title}`} title={sec.title}>
+            {sec.items.map((it, i) => {
+              const key = `sec-${si}-${i}`;
+              return (
+                <Card
+                  key={key}
+                  cover={it.cover}
+                  title={it.title}
+                  subtitle={it.artist || ""}
+                  onPlay={() => handleCardPick(it, key)}
+                  busy={resolvingUrl === key}
+                  disabled={Boolean(resolvingUrl)}
+                  active={
+                    isPlaying &&
+                    track?.title?.toLowerCase() === it.title.toLowerCase() &&
+                    (track?.artist || "").toLowerCase() === (it.artist || "").toLowerCase()
+                  }
+                />
+              );
+            })}
+          </CardRow>
+        ))}
+
       {tab === "cari" && history.length > 0 && (
-        <div className="mt-10 rounded-2xl border border-white/10 bg-ink-900/40 p-2.5">
-          <button
-            type="button"
-            onClick={toggleHistory}
-            aria-expanded={histOpen}
-            className="flex w-full items-center gap-2 text-left text-sm font-medium text-white/60 hover:text-white"
-          >
-            <History size={16} />
-            Riwayat pencarian
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">{history.length}</span>
-            <ChevronDown size={18} className={`ml-auto transition-transform duration-200 ${histOpen ? "rotate-180" : ""}`} />
-          </button>
-          {histOpen && (
-          <div
-            ref={histRef}
-            className="relative mt-2.5 space-y-2 overflow-y-auto overscroll-contain p-0.5 pb-1.5 pr-1.5"
-            style={histMax ? { maxHeight: histMax } : undefined}
-          >
-            {history.map((t) => (
-              <div
-                key={t.id}
-                className={`flex items-center gap-2 rounded-xl border px-2 py-2 transition-colors ${
-                  track?.id === t.id ? "border-signal-500/40 bg-signal-500/5" : "border-white/8 bg-ink-900/60"
-                }`}
-              >
-                {t.thumbnail ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={t.thumbnail}
-                    alt=""
-                    referrerPolicy="no-referrer"
-                    className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
-                  />
-                ) : (
-                  <span className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-lg bg-white/5 text-white/30">
-                    <Music2 size={16} />
-                  </span>
-                )}
-                <div className="min-w-0 flex-1">
-                  {/* Judul boleh 2 baris supaya terbaca penuh (tidak terpotong jadi "DJ ...") */}
-                  <p
-                    className="break-words text-sm font-medium leading-snug text-white"
-                    style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
-                  >
-                    {t.title}
-                  </p>
-                  <p className="truncate text-xs text-white/40">
-                    {sourceLabel(t.source)} · {t.artist}
-                  </p>
-                </div>
-                <div className="flex flex-shrink-0 items-center gap-0.5">
+        <CardRow title="Riwayat pencarian" count={history.length}>
+          {history.map((t) => (
+            <Card
+              key={t.id}
+              cover={t.thumbnail}
+              title={t.title}
+              subtitle={`${sourceLabel(t.source)} · ${t.artist}`}
+              onPlay={() => playTrack(t)}
+              active={track?.id === t.id && isPlaying}
+              actions={
+                <>
                   <button
-                    onClick={() => playTrack(t)}
-                    className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full bg-signal-500 text-ink-950"
-                    aria-label={`Putar ${t.title}`}
-                  >
-                    <Play size={14} className="ml-0.5" />
-                  </button>
-                  <button
+                    type="button"
                     onClick={() => setAddTarget(t)}
-                    className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-white/40 hover:bg-white/10 hover:text-white"
                     aria-label={`Tambah ${t.title} ke playlist`}
                     title="Tambah ke playlist"
+                    className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white hover:bg-black/80"
                   >
-                    <ListPlus size={16} />
+                    <ListPlus size={14} />
                   </button>
                   <button
+                    type="button"
                     onClick={() => removeFromHistory(t.id)}
-                    className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-white/40 hover:bg-flare-500/10 hover:text-flare-400"
                     aria-label={`Hapus ${t.title} dari riwayat`}
+                    title="Hapus dari riwayat"
+                    className="grid h-7 w-7 place-items-center rounded-full bg-black/60 text-white hover:bg-flare-500"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={13} />
                   </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          )}
-        </div>
+                </>
+              }
+            />
+          ))}
+        </CardRow>
       )}
 
       {addTarget && <AddToPlaylistModal song={addTarget} pl={pl} onClose={() => setAddTarget(null)} />}
