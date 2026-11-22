@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X, Download, Wand2, Music2, Bot, Heart, Mail } from "lucide-react";
+import { Menu, X, Download, Wand2, Music2, Bot, Heart, Mail, FileText } from "lucide-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { SITE_NAME, SITE_LOGO } from "@/lib/site";
@@ -16,6 +16,13 @@ const LINKS = [
   { href: "/tempmail", label: "Temp Mail", icon: Mail },
   { href: "/chat", label: "Chat AI", icon: Bot },
   { href: "/dukungan", label: "Dukungan", icon: Heart },
+];
+
+// Isi menu hamburger (HP). Lima halaman utama ada di tab bar bawah
+// (components/BottomTabBar.js), jadi di sini hanya halaman pelengkap.
+const MENU_LINKS = [
+  { href: "/dukungan", label: "Dukungan", icon: Heart },
+  { href: "/kebijakan#syarat", label: "Syarat & Ketentuan", icon: FileText },
 ];
 
 export default function Navbar() {
@@ -122,7 +129,7 @@ export default function Navbar() {
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-          {LINKS.map(({ href, label, icon: Icon }, i) => {
+          {MENU_LINKS.map(({ href, label, icon: Icon }, i) => {
             const active = pathname === href;
             return (
               <Link
