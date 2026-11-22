@@ -7,6 +7,7 @@ import SplashLoader from "@/components/SplashLoader";
 import ChannelPromo from "@/components/ChannelPromo";
 import MusicPlayerProvider from "@/components/MusicPlayerProvider";
 import MiniPlayer from "@/components/MiniPlayer";
+import BottomTabBar from "@/components/BottomTabBar";
 import { THEME_STORAGE_KEY } from "@/lib/themes";
 import { SITE_NAME, SITE_TAGLINE, SITE_FAVICON, SITE_LOGO, SITE_URL } from "@/lib/site";
 
@@ -152,6 +153,9 @@ export default function RootLayout({ children }) {
           <MiniPlayer />
           <main className="min-h-[calc(100dvh-64px)]">{children}</main>
           <Footer />
+          {/* Ruang kosong di HP supaya bagian paling bawah halaman tidak tertutup tab bar mengambang. */}
+          <div className="h-24 md:hidden" aria-hidden="true" />
+          <BottomTabBar />
         </MusicPlayerProvider>
       </body>
     </html>
