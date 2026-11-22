@@ -1,0 +1,19 @@
+{
+  "_petunjuk": [
+    "Isi daftar lagu yang tampil di halaman Musik (tab Cari). Setiap 'section' jadi satu baris kotak album yang bisa digeser.",
+    "Section yang 'items'-nya kosong tidak ditampilkan, jadi aman dibiarkan kosong.",
+    "Tambah section baru dengan menyalin satu blok { \"title\": ..., \"items\": [...] } lalu ganti judulnya.",
+    "Tiap lagu (item): 'title' = judul lagu, 'artist' = nama artis, 'cover' = link gambar album (https://...).",
+    "Opsional: 'source' = spotify / youtube / soundcloud (kalau kosong, memakai sumber yang sedang dipilih pengunjung), 'query' = kata kunci pencarian khusus kalau judul + artis kurang pas.",
+    "Setelah file ini diubah, deploy ulang supaya perubahannya tampil."
+  ],
+  "_contoh_item": {
+    "title": "Judul Lagu",
+    "artist": "Nama Artis",
+    "cover": "https://contoh.com/cover-album.jpg"
+  },
+  "sections": [
+    { "title": "Lagu trending", "items": [] },
+    { "title": "Rekomendasi", "items": [] }
+  ]
+}
