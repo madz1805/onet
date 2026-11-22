@@ -5,7 +5,7 @@
     "Tambah section baru dengan menyalin satu blok { \"title\": ..., \"items\": [...] } lalu ganti judulnya.",
     "Tiap lagu (item): 'title' = judul lagu, 'artist' = nama artis, 'cover' = link gambar album (https://...).",
     "Opsional: 'source' = spotify / youtube / soundcloud (kalau kosong, memakai sumber yang sedang dipilih pengunjung), 'query' = kata kunci pencarian khusus kalau judul + artis kurang pas.",
-    "Setelah file ini diubah, deploy ulang supaya perubahannya tampil."
+    "File ini hanya cadangan. Kalau env TRENDING_URL diisi (link RAW trending.json di GitHub / Gist), daftar lagu dibaca dari sana dan bisa diubah tanpa deploy ulang. Kalau env tidak diisi, file ini yang dipakai dan perubahannya perlu deploy ulang."
   ],
   "_contoh_item": {
     "title": "Judul Lagu",
