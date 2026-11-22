@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Search,
   Play,
@@ -12,7 +12,6 @@ import {
   X,
 } from "lucide-react";
 import { makeTrackId } from "@/lib/musicHistory";
-import trending from "@/data/trending.json";
 import PlaylistTab from "@/components/PlaylistTab";
 import AddToPlaylistModal from "@/components/AddToPlaylistModal";
 import usePlaylists from "@/lib/usePlaylists";
@@ -36,15 +35,6 @@ function formatTime(sec) {
     .padStart(2, "0");
   return `${m}:${s}`;
 }
-
-// Daftar lagu untuk baris-baris kotak album di tab Cari, diisi manual lewat
-// data/trending.json. Section tanpa lagu tidak ditampilkan.
-const SECTIONS = (Array.isArray(trending?.sections) ? trending.sections : [])
-  .map((sec) => ({
-    title: sec?.title || "",
-    items: (Array.isArray(sec?.items) ? sec.items : []).filter((it) => it && it.title),
-  }))
-  .filter((sec) => sec.title && sec.items.length > 0);
 
 // Satu baris kotak yang bisa digeser ke samping (gaya daftar Spotify).
 function CardRow({ title, count, children }) {
@@ -130,9 +120,29 @@ export default function MusicSection() {
   const [searchedQuery, setSearchedQuery] = useState("");
   const [resolvingUrl, setResolvingUrl] = useState(null);
   const [tab, setTab] = useState("cari"); // cari | playlist
+  // Baris-baris kotak album (Lagu trending, Rekomendasi, dst.) dari /api/trending,
+  // yang bersumber dari env TRENDING_URL atau data/trending.json.
+  const [sections, setSections] = useState([]);
+  const [sectionsLoaded, setSectionsLoaded] = useState(false);
   const pl = usePlaylists();
   const searchInputRef = useRef(null);
 
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/trending")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!cancelled && d?.status && Array.isArray(d.sections)) setSections(d.sections);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setSectionsLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const searchSeq = useRef(0); // mencegah hasil lama menimpa pencarian yang lebih baru
   // Semua state pemutaran (audio, lagu aktif, riwayat, mode, progres) ada di
@@ -452,7 +462,7 @@ export default function MusicSection() {
         </div>
       )}
 
-      {tab === "cari" && !track && !error && !playbackError && history.length === 0 && results.length === 0 && !loading && SECTIONS.length === 0 && (
+      {tab === "cari" && !track && !error && !playbackError && history.length === 0 && results.length === 0 && !loading && sectionsLoaded && sections.length === 0 && (
         <div className="mt-14 flex flex-col items-center gap-3 text-center text-white/40">
           <Music2 size={32} />
           <p className="max-w-sm text-sm">
@@ -469,7 +479,7 @@ export default function MusicSection() {
       )}
 
       {tab === "cari" && results.length === 0 && !loading &&
-        SECTIONS.map((sec, si) => (
+        sections.map((sec, si) => (
           <CardRow key={`${si}-${sec.title}`} title={sec.title}>
             {sec.items.map((it, i) => {
               const key = `sec-${si}-${i}`;
