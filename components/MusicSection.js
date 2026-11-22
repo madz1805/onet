@@ -6,7 +6,6 @@ import {
   Play,
   Loader2,
   Music2,
-  Trash2,
   Volume2,
   ListPlus,
   ArrowRight,
@@ -38,7 +37,7 @@ function formatTime(sec) {
 }
 
 // Satu baris kotak yang bisa digeser ke samping (gaya daftar Spotify).
-function CardRow({ title, count, children }) {
+function CardRow({ title, count, hint, children }) {
   return (
     <section className="mt-8">
       <h2 className="mb-3 flex items-center gap-2 font-display text-base font-semibold text-white">
@@ -47,6 +46,7 @@ function CardRow({ title, count, children }) {
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">{count}</span>
         )}
       </h2>
+      {hint && <p className="-mt-2 mb-3 text-xs text-white/40">{hint}</p>}
       <div className="-mx-5 flex snap-x gap-3 overflow-x-auto overscroll-x-contain px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {children}
       </div>
@@ -54,52 +54,108 @@ function CardRow({ title, count, children }) {
   );
 }
 
-// Satu kotak: cover persegi + judul + artis. `actions` (opsional) tampil di
-// pojok kanan atas cover, mis. tombol tambah ke playlist / hapus.
-function Card({ cover, title, subtitle, onPlay, busy, active, disabled, actions }) {
+// Satu kotak: cover persegi + judul + artis. Ketuk = putar. Tekan-tahan (atau
+// klik kanan di desktop) = `onLongPress`, dipakai untuk membuka jendela
+// "Tambah ke playlist".
+const LONG_PRESS_MS = 450;
+const HINT = "Tekan tahan cover untuk tambah ke playlist";
+
+function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disabled }) {
+  const timer = useRef(null);
+  const fired = useRef(false); // tekan-tahan sudah terpicu: abaikan klik yang menyusul
+  const origin = useRef({ x: 0, y: 0 });
+
+  function clearTimer() {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
+  }
+
+  function handlePointerDown(e) {
+    fired.current = false;
+    clearTimer();
+    if (!onLongPress || (e.pointerType === "mouse" && e.button !== 0)) return;
+    origin.current = { x: e.clientX, y: e.clientY };
+    timer.current = setTimeout(() => {
+      timer.current = null;
+      fired.current = true;
+      try {
+        navigator.vibrate?.(15);
+      } catch {
+        // perangkat tanpa getar: abaikan
+      }
+      onLongPress();
+    }, LONG_PRESS_MS);
+  }
+
+  // Jari bergeser (menggeser baris ke samping): bukan tekan-tahan.
+  function handlePointerMove(e) {
+    if (!timer.current) return;
+    if (Math.abs(e.clientX - origin.current.x) > 10 || Math.abs(e.clientY - origin.current.y) > 10) clearTimer();
+  }
+
+  function handleClick(e) {
+    if (fired.current) {
+      fired.current = false;
+      e.preventDefault();
+      return;
+    }
+    onPlay();
+  }
+
+  function handleContextMenu(e) {
+    e.preventDefault(); // tekan-tahan di HP memicu menu browser; pakai jendela playlist saja
+    if (onLongPress && !fired.current && !timer.current) onLongPress(); // klik kanan di desktop
+  }
+
   return (
     <div className="w-32 flex-shrink-0 snap-start">
-      <div className="relative">
-        <button
-          type="button"
-          onClick={onPlay}
-          disabled={disabled}
-          aria-label={`Putar ${title}`}
-          className="block w-full text-left disabled:cursor-wait"
-        >
-          {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={cover}
-              alt=""
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              className={`aspect-square w-full rounded-xl border object-cover ${
-                active ? "border-signal-500" : "border-white/10"
-              } ${disabled && !busy ? "opacity-50" : ""}`}
-            />
-          ) : (
-            <span
-              className={`grid aspect-square w-full place-items-center rounded-xl border bg-ink-800/70 text-white/30 ${
-                active ? "border-signal-500" : "border-white/10"
-              }`}
-            >
-              <Music2 size={28} />
-            </span>
-          )}
-          {busy && (
-            <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/50 text-white">
-              <Loader2 size={22} className="animate-spin" />
-            </span>
-          )}
-          {active && !busy && (
-            <span className="absolute bottom-1.5 left-1.5 grid h-7 w-7 place-items-center rounded-full bg-signal-500 text-ink-950">
-              <Volume2 size={14} />
-            </span>
-          )}
-        </button>
-        {actions && <div className="absolute right-1.5 top-1.5 flex flex-col gap-1">{actions}</div>}
-      </div>
+      <button
+        type="button"
+        onClick={handleClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={clearTimer}
+        onPointerLeave={clearTimer}
+        onPointerCancel={clearTimer}
+        onContextMenu={handleContextMenu}
+        disabled={disabled}
+        aria-label={`Putar ${title}`}
+        className="relative block w-full select-none text-left [-webkit-touch-callout:none] disabled:cursor-wait"
+      >
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={cover}
+            alt=""
+            draggable={false}
+            referrerPolicy="no-referrer"
+            loading="lazy"
+            className={`aspect-square w-full rounded-xl border object-cover ${
+              active ? "border-signal-500" : "border-white/10"
+            } ${disabled && !busy ? "opacity-50" : ""}`}
+          />
+        ) : (
+          <span
+            className={`grid aspect-square w-full place-items-center rounded-xl border bg-ink-800/70 text-white/30 ${
+              active ? "border-signal-500" : "border-white/10"
+            }`}
+          >
+            <Music2 size={28} />
+          </span>
+        )}
+        {busy && (
+          <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/50 text-white">
+            <Loader2 size={22} className="animate-spin" />
+          </span>
+        )}
+        {active && !busy && (
+          <span className="absolute bottom-1.5 left-1.5 grid h-7 w-7 place-items-center rounded-full bg-signal-500 text-ink-950">
+            <Volume2 size={14} />
+          </span>
+        )}
+      </button>
       <p
         className="mt-2 break-words text-sm font-medium leading-snug text-white"
         style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
@@ -145,6 +201,8 @@ export default function MusicSection() {
     };
   }, []);
 
+  // id lagu riwayat yang jendela "Tambah ke playlist"-nya boleh menampilkan tombol Buang.
+  const [removeId, setRemoveId] = useState(null);
   const searchSeq = useRef(0); // mencegah hasil lama menimpa pencarian yang lebih baru
   // Semua state pemutaran (audio, lagu aktif, riwayat, mode, progres) ada di
   // MusicPlayerProvider supaya lagu tetap jalan saat pindah halaman.
@@ -280,6 +338,23 @@ export default function MusicSection() {
     } finally {
       setResolvingUrl(null);
     }
+  }
+
+  // Data lagu dari satu kotak data/trending.json (belum punya link stream; pemutar
+  // mengambilnya dari judul + artis saat lagunya diputar dari playlist).
+  function songFromCard(it) {
+    const src = SOURCES.some((x) => x.id === it.source) ? it.source : source;
+    const artist = it.artist || "";
+    const q = (it.query || `${it.title} ${artist}`).trim();
+    return {
+      id: makeTrackId({ source: src, title: it.title, artist }),
+      source: src,
+      title: it.title,
+      artist,
+      thumbnail: it.cover || null,
+      searchQuery: q,
+      query: q,
+    };
   }
 
   // Data lagu dari satu hasil pencarian, untuk disimpan ke playlist.
@@ -491,7 +566,7 @@ export default function MusicSection() {
 
       {tab === "cari" && results.length === 0 && !loading &&
         sections.map((sec, si) => (
-          <CardRow key={`${si}-${sec.title}`} title={sec.title}>
+          <CardRow key={`${si}-${sec.title}`} title={sec.title} hint={si === 0 ? HINT : undefined}>
             {sec.items.map((it, i) => {
               const key = `sec-${si}-${i}`;
               return (
@@ -501,6 +576,10 @@ export default function MusicSection() {
                   title={it.title}
                   subtitle={it.artist || ""}
                   onPlay={() => handleCardPick(it, key)}
+                  onLongPress={() => {
+                    setRemoveId(null);
+                    setAddTarget(songFromCard(it));
+                  }}
                   busy={resolvingUrl === key}
                   disabled={Boolean(resolvingUrl)}
                   active={
@@ -515,7 +594,11 @@ export default function MusicSection() {
         ))}
 
       {tab === "cari" && history.length > 0 && (
-        <CardRow title="Riwayat pencarian" count={history.length}>
+        <CardRow
+          title="Riwayat pencarian"
+          count={history.length}
+          hint={sections.length === 0 ? HINT : undefined}
+        >
           {history.map((t) => (
             <Card
               key={t.id}
@@ -523,37 +606,27 @@ export default function MusicSection() {
               title={t.title}
               subtitle={`${sourceLabel(t.source)} · ${t.artist}`}
               onPlay={() => playTrack(t)}
+              onLongPress={() => {
+                setRemoveId(t.id);
+                setAddTarget(t);
+              }}
               active={track?.id === t.id && isPlaying}
-              actions={
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setAddTarget(t)}
-                    aria-label={`Tambah ${t.title} ke playlist`}
-                    title="Tambah ke playlist"
-                    className="grid h-8 w-8 place-items-center rounded-full border-2"
-                    style={{ background: "#fff", color: "#111", borderColor: "#111" }}
-                  >
-                    <ListPlus size={16} strokeWidth={2.4} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeFromHistory(t.id)}
-                    aria-label={`Hapus ${t.title} dari riwayat`}
-                    title="Hapus dari riwayat"
-                    className="grid h-8 w-8 place-items-center rounded-full border-2"
-                    style={{ background: "#fff", color: "#d11a1a", borderColor: "#111" }}
-                  >
-                    <Trash2 size={15} strokeWidth={2.4} />
-                  </button>
-                </>
-              }
             />
           ))}
         </CardRow>
       )}
 
-      {addTarget && <AddToPlaylistModal song={addTarget} pl={pl} onClose={() => setAddTarget(null)} />}
+      {addTarget && (
+        <AddToPlaylistModal
+          song={addTarget}
+          pl={pl}
+          onClose={() => {
+            setAddTarget(null);
+            setRemoveId(null);
+          }}
+          onRemove={removeId && removeId === addTarget.id ? () => removeFromHistory(addTarget.id) : undefined}
+        />
+      )}
     </div>
   );
 }
