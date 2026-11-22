@@ -4,11 +4,13 @@
 // berada (satu lagu boleh ada di banyak playlist), atau buat playlist baru.
 
 import { useState } from "react";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, Trash2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { MAX_NAME } from "@/lib/musicPlaylists";
 
-export default function AddToPlaylistModal({ song, pl, onClose }) {
+// onRemove (opsional): kalau ada, tombol "Buang" tampil di bawah "Selesai" (dipakai untuk
+// lagu dari Riwayat pencarian: membuangnya dari riwayat lalu menutup jendela).
+export default function AddToPlaylistModal({ song, pl, onClose, onRemove }) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
 
@@ -97,6 +99,21 @@ export default function AddToPlaylistModal({ song, pl, onClose }) {
       >
         Selesai
       </button>
+
+      {onRemove && (
+        <button
+          type="button"
+          onClick={() => {
+            onRemove();
+            onClose();
+          }}
+          aria-label="Buang dari riwayat pencarian"
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-flare-500/40 px-4 py-3 text-sm font-medium text-flare-400 hover:bg-flare-500/10"
+        >
+          <Trash2 size={16} />
+          Hapus
+        </button>
+      )}
     </Modal>
   );
 }
