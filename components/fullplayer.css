@@ -517,3 +517,40 @@
 [data-theme="neobrutalism"] .fp-fx-sec {
   border-top-color: var(--nb-ink);
 }
+
+
+/* --- Animasi pindah Cover <-> Lirik (HP) ----------------------------------
+   Panel tujuan masuk dengan slide halus dari sisi arah geser: Lirik dari kanan
+   (geser cover ke kiri), Cover dari kiri (geser lirik ke kanan). */
+@keyframes fp-in-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fp-in-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fp-in-from-right {
+  animation: fp-in-from-right 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fp-in-from-left {
+  animation: fp-in-from-left 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (min-width: 768px), (prefers-reduced-motion: reduce) {
+  .fp-in-from-right,
+  .fp-in-from-left {
+    animation: none;
+  }
+}
