@@ -37,6 +37,8 @@ function formatTime(sec) {
 }
 
 // Satu baris kotak yang bisa digeser ke samping (gaya daftar Spotify).
+// `scroll-px-5` = jarak snap sama dengan padding baris, supaya kotak pertama
+// tetap sejajar dengan judul di atasnya (tidak menempel ke tepi layar).
 function CardRow({ title, count, hint, children }) {
   return (
     <section className="mt-8">
@@ -47,7 +49,7 @@ function CardRow({ title, count, hint, children }) {
         )}
       </h2>
       {hint && <p className="-mt-2 mb-3 text-xs text-white/40">{hint}</p>}
-      <div className="-mx-5 flex snap-x gap-3 overflow-x-auto overscroll-x-contain px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-5 flex snap-x scroll-px-5 gap-3 overflow-x-auto overscroll-x-contain px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {children}
       </div>
     </section>
