@@ -60,7 +60,7 @@ function CardRow({ title, count, hint, children }) {
 // klik kanan di desktop) = `onLongPress`, dipakai untuk membuka jendela
 // "Tambah ke playlist".
 const LONG_PRESS_MS = 450;
-const HINT = "Tekan tahan cover untuk tambah ke playlist";
+const HINT = "";
 
 function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disabled }) {
   const timer = useRef(null);
