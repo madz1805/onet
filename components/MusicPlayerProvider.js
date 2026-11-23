@@ -224,10 +224,13 @@ export default function MusicPlayerProvider({ children }) {
   }, []);
 
   // Dipakai MusicSection setelah pencarian berhasil: simpan ke riwayat + putar.
+  // `list` (opsional) = antrean tempat lagu itu berasal (mis. satu baris rekomendasi):
+  // lagu berikutnya mengikuti antrean itu dan berhenti di ujungnya. Tanpa `list`,
+  // next/prev kembali mengikuti riwayat.
   const addAndPlay = useCallback(
-    (t) => {
+    (t, list = null) => {
       setHistory((h) => addToMusicHistory(h, t));
-      playTrack(t); // tanpa antrean: next/prev kembali mengikuti riwayat
+      playTrack(t, list);
     },
     [playTrack]
   );
