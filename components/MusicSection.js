@@ -267,7 +267,7 @@ export default function MusicSection() {
   }
 
   // Ambil link stream sebuah hasil pencarian, lalu putar. Melempar error kalau gagal.
-  async function playResolved(item, src, q) {
+  async function playResolved(item, src, q, queueInfo = null) {
     const res = await fetch("/api/music", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -278,7 +278,7 @@ export default function MusicSection() {
 
     const title = item.title || data.title;
     const artist = item.artist || data.artist || "";
-    addAndPlay({
+    const played = {
       id: makeTrackId({ source: src, title, artist }),
       source: src,
       title,
@@ -290,7 +290,11 @@ export default function MusicSection() {
       pageUrl: item.url, // dipakai pemutar untuk mengambil ulang link yang kedaluwarsa
       searchQuery: item.query,
       resolvedAt: Date.now(),
-    });
+    };
+    // Dari kotak rekomendasi/trending: antreannya = isi baris itu (lagu yang baru
+    // diputar menggantikan entri aslinya), jadi lagu berikutnya ikut baris yang sama.
+    const list = queueInfo ? queueInfo.list.map((x, i) => (i === queueInfo.index ? played : x)) : null;
+    addAndPlay(played, list);
   }
 
   // Lagu dipilih dari daftar hasil: ambil link stream-nya, lalu putar.
@@ -310,7 +314,7 @@ export default function MusicSection() {
   // Kotak dari data/trending.json diketuk: cari "judul artis" di sumber yang
   // sedang dipilih, ambil hasil teratas, lalu putar. Cover & judul tetap
   // memakai yang tertulis di file supaya sama dengan yang terlihat di kotak.
-  async function handleCardPick(item, key) {
+  async function handleCardPick(item, key, sec, index) {
     if (resolvingUrl) return;
     const src = SOURCES.some((s) => s.id === item.source) ? item.source : source;
     const q = (item.query || `${item.title} ${item.artist || ""}`).trim();
@@ -333,7 +337,8 @@ export default function MusicSection() {
           thumbnail: item.cover || first.thumbnail,
         },
         src,
-        q
+        q,
+        { list: sec.items.map(songFromCard), index }
       );
     } catch (err) {
       setError(err.message || "Gagal mengambil lagu.");
@@ -577,7 +582,7 @@ export default function MusicSection() {
                   cover={it.cover}
                   title={it.title}
                   subtitle={it.artist || ""}
-                  onPlay={() => handleCardPick(it, key)}
+                  onPlay={() => handleCardPick(it, key, sec, i)}
                   onLongPress={() => {
                     setRemoveId(null);
                     setAddTarget(songFromCard(it));
