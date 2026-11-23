@@ -41,14 +41,14 @@ function formatTime(sec) {
 // tetap sejajar dengan judul di atasnya (tidak menempel ke tepi layar).
 function CardRow({ title, count, hint, children }) {
   return (
-    <section className="mt-8">
-      <h2 className="mb-3 flex items-center gap-2 font-display text-base font-semibold text-white">
+    <section className="mt-5">
+      <h2 className="mb-2.5 flex items-center gap-2 font-display text-xl font-semibold leading-tight text-white">
         {title}
         {count != null && (
           <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium text-white/60">{count}</span>
         )}
       </h2>
-      {hint && <p className="-mt-2 mb-3 text-xs text-white/40">{hint}</p>}
+      {hint && <p className="-mt-1 mb-2.5 text-xs text-white/40">{hint}</p>}
       <div className="-mx-5 flex snap-x scroll-px-5 gap-3 overflow-x-auto overscroll-x-contain px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {children}
       </div>
