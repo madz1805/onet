@@ -63,36 +63,29 @@ export default function PolicyPage() {
           </p>
         </LegalSection>
 
-        <LegalSection title="2. Layanan pihak ketiga">
-          <p>
-            Kami memakai layanan berikut untuk menjalankan situs: Vercel (hosting), Cloudflare (Turnstile), Telegram
-            (penerimaan laporan error), serta berbagai layanan sumber dan pemrosesan media. Masing-masing memiliki
-            kebijakan privasinya sendiri.
-          </p>
-        </LegalSection>
 
-        <LegalSection title="3. Tujuan penggunaan data">
+        <LegalSection title="2. Tujuan penggunaan data">
           <p>
             Data dipakai hanya untuk menjalankan fitur yang kamu minta, menjaga keamanan dan mencegah penyalahgunaan,
             serta memperbaiki gangguan. Kami tidak menjual data pribadimu dan tidak memakainya untuk iklan.
           </p>
         </LegalSection>
 
-        <LegalSection title="4. Berapa lama data disimpan">
+        <LegalSection title="3. Berapa lama data disimpan">
           <p>Kami tidak menyimpan akun atau profil pengguna. Data di browser tersimpan sampai kamu menghapusnya.</p>
         </LegalSection>
 
-        <LegalSection title="5. Hakmu">
+        <LegalSection title="4. Hakmu">
           <p>
             Kalau kamu punya pertanyaan atau permintaan terkait datamu, hubungi kami di <Mail />.
           </p>
         </LegalSection>
 
-        <LegalSection title="6. Anak-anak">
+        <LegalSection title="5. Anak-anak">
           <p>Layanan ini tidak ditujukan untuk anak di bawah 13 tahun, dan kami tidak dengan sengaja mengumpulkan datanya.</p>
         </LegalSection>
 
-        <LegalSection title="7. Perubahan kebijakan">
+        <LegalSection title="6. Perubahan kebijakan">
           <p>Kebijakan ini dapat diperbarui. Tanggal pembaruan terakhir tertera di bagian atas halaman.</p>
         </LegalSection>
       </LegalGroup>
