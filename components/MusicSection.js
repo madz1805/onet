@@ -60,7 +60,35 @@ function CardRow({ title, count, hint, children }) {
 // klik kanan di desktop) = `onLongPress`, dipakai untuk membuka jendela
 // "Tambah ke playlist".
 const LONG_PRESS_MS = 450;
-const HINT = "";
+
+// Saat tekan-tahan memicu jendela playlist, jari masih menempel di layar dan HP
+// ikut menganggapnya tekan-tahan pada teks di jendela itu (muncul pilihan
+// Terjemahkan/Salin). Selama itu seleksi teks dimatikan sebentar, lalu
+// dikembalikan begitu jari dilepas (atau paling lama 1,5 detik).
+let selectionTimer = null;
+function unlockTextSelection() {
+  if (selectionTimer) clearTimeout(selectionTimer);
+  selectionTimer = null;
+  try {
+    document.body.style.userSelect = "";
+    document.body.style.webkitUserSelect = "";
+    window.getSelection()?.removeAllRanges();
+  } catch {
+    // abaikan
+  }
+}
+function lockTextSelection() {
+  try {
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+    window.getSelection()?.removeAllRanges();
+  } catch {
+    // abaikan
+  }
+  if (selectionTimer) clearTimeout(selectionTimer);
+  selectionTimer = setTimeout(unlockTextSelection, 1500);
+}
+const HINT = "Tekan tahan cover untuk tambah ke playlist";
 
 function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disabled }) {
   const timer = useRef(null);
@@ -82,6 +110,7 @@ function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disab
     timer.current = setTimeout(() => {
       timer.current = null;
       fired.current = true;
+      lockTextSelection();
       try {
         navigator.vibrate?.(15);
       } catch {
@@ -89,6 +118,12 @@ function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disab
       }
       onLongPress();
     }, LONG_PRESS_MS);
+  }
+
+  // Jari dilepas / sentuhan dibatalkan.
+  function handlePointerEnd() {
+    clearTimer();
+    if (fired.current) setTimeout(unlockTextSelection, 300);
   }
 
   // Jari bergeser (menggeser baris ke samping): bukan tekan-tahan.
@@ -118,9 +153,9 @@ function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disab
         onClick={handleClick}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerUp={clearTimer}
+        onPointerUp={handlePointerEnd}
         onPointerLeave={clearTimer}
-        onPointerCancel={clearTimer}
+        onPointerCancel={handlePointerEnd}
         onContextMenu={handleContextMenu}
         disabled={disabled}
         aria-label={`Putar ${title}`}
@@ -602,7 +637,7 @@ export default function MusicSection() {
 
       {tab === "cari" && history.length > 0 && (
         <CardRow
-          title="Riwayat"
+          title="Riwayat pencarian"
           count={history.length}
           hint={sections.length === 0 ? HINT : undefined}
         >
