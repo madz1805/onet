@@ -14,41 +14,82 @@
   },
   "sections": [
     {
-      "title": "Lagu trending",
-      "items": []
-    },
-    {
       "title": "For you",
       "items": [
         {
-          "title": "Olivia Rodrigo - the cure",
+          "title": "The cure",
           "artist": "Olivia Rodrigo",
           "cover": "https://i.scdn.co/image/ab67616d0000b2735cf234eeb7a2edf44bf64a46"
         },
         {
-          "title": "The 1975 - About You",
+          "title": "About You",
           "artist": "The 1975",
           "cover": "https://i.scdn.co/image/ab67616d0000b27300702474f8e0e2b6155d48e3"
         },
         {
-          "title": "Bleachers - Merry Christmas, Please Don't Call",
+          "title": "Merry Christmas, Please Don't Call",
           "artist": "Bleachers",
           "cover": "https://i.scdn.co/image/ab67616d0000b2737fbed05d7226834da74c652b"
         },
         {
-          "title": "Alex Crichton - What If I Call",
+          "title": "What If I Call",
           "artist": "Alex Crichton",
           "cover": "https://i.scdn.co/image/ab67616d0000b27354eb62b85844cd19c533d245"
         },
         {
-          "title": "Taylor Swift - Style",
+          "title": "Style",
           "artist": "Taylor Swift",
           "cover": "https://i.scdn.co/image/ab67616d0000b2739abdf14e6058bd3903686148"
         },
         {
-          "title": "NIKI - Backburner",
+          "title": "Backburner",
           "artist": "NIKI",
           "cover": "https://i.scdn.co/image/ab67616d0000b27389aa3d00d339b8948374782b"
+        }
+      ]
+    },
+    {
+      "title": "Indo",
+      "items": [
+        {
+          "title": "Separuh Aku",
+          "artist": "Noah",
+          "cover": "https://i.scdn.co/image/ab67616d0000b273ef9c61634ef59e7ee439dacc"
+        },
+        {
+          "title": "Masa muda ku habis",
+          "artist": "Ghea indrawari",
+          "cover": "https://i.scdn.co/image/ab67616d0000b2739798fbe1bd1cdf2915bd0394"
+        },
+        {
+          "title": "Amnesia",
+          "artist": "Al-Ghazali",
+          "cover": "https://i.scdn.co/image/ab67616d0000b273b0e2b5e8f68a2dc600c12478"
+        },
+        {
+          "title": "Kita Lewati Berdua",
+          "artist": "Overnight",
+          "cover": "https://i.scdn.co/image/ab67616d0000b273ba98a4545f17d964758c9122"
+        },
+        {
+          "title": "Merindumu lagi",
+          "artist": "Khifnu",
+          "cover": "https://i.scdn.co/image/ab67616d0000b273bae1263824544273f7a30e10"
+        },
+        {
+          "title": "Everything u are",
+          "artist": "Hindia",
+          "cover": "https://i.scdn.co/image/ab67616d0000b27305898628baab6ef07a0a4d03"
+        },
+        {
+          "title": "Selamat (selamat tinggal)",
+          "artist": "Virgoun",
+          "cover": "https://i.scdn.co/image/ab67616d0000b273dbd21bc0b35f4220357a1c66"
+        },
+        {
+          "title": "1000X",
+          "artist": "Ghea indrawari",
+          "cover": "https://i.scdn.co/image/ab67616d0000b27353ab629cb64f2dad691e1301"
         }
       ]
     }
