@@ -113,12 +113,18 @@ export default function FullPlayer() {
   } = useMusicPlayer();
 
   const [view, setView] = useState("cover"); // cover | lirik
-  // Geser cover ke kanan = buka Lirik; geser Lirik ke kiri = kembali ke Cover. Tanpa petunjuk di layar.
-  const swipeStart = useRef(null);
+  // Geser cover ke KIRI = buka Lirik; geser Lirik ke KANAN = kembali ke Cover (tanpa petunjuk di
+  // layar). Panel ikut bergeser mengikuti jari, lalu panel tujuan masuk dengan animasi slide.
+  const [viewAnim, setViewAnim] = useState(null); // "to-lirik" | "to-cover" | null
+  const coverBoxRef = useRef(null);
+  const swipeState = useRef(null);
   const [lyrics, setLyrics] = useState({ key: null, state: "idle", synced: [], plain: "", instrumental: false });
   const [retry, setRetry] = useState(0);
   const [dragY, setDragY] = useState(0);
   // Layar lebar (desktop / "situs desktop" di HP): cover & lirik tampil berdampingan.
+  useEffect(() => {
+    if (!playerOpen) setViewAnim(null); // buka ulang pemutar: jangan memutar animasi slide lagi
+  }, [playerOpen]);
   const [wide, setWide] = useState(false);
   // Tampilan album (soft | square | vinyl) + menu gear untuk menggantinya.
   const [coverStyle, setCoverStyle] = useState("soft");
@@ -365,6 +371,68 @@ export default function FullPlayer() {
     userScrollUntil.current = Date.now() + 3500;
   };
 
+  function goView(v) {
+    if (v === view) return;
+    setViewAnim(v === "lirik" ? "to-lirik" : "to-cover");
+    setView(v);
+  }
+
+  // Geser mendatar pada panel `elRef`: arah `sign` (-1 = kiri, +1 = kanan) memicu `onCommit`.
+  // Selama menggeser, panel ikut bergerak (agak tertahan); kalau kurang jauh, kembali dengan halus.
+  function swipeHandlers(elRef, sign, onCommit, onStart) {
+    const reset = (animate) => {
+      const el = elRef.current;
+      if (!el) return;
+      el.style.transition = animate ? "transform 0.25s ease, opacity 0.25s ease" : "none";
+      el.style.transform = "";
+      el.style.opacity = "";
+    };
+    return {
+      onTouchStart: (e) => {
+        onStart?.(e);
+        const t = e.touches[0];
+        swipeState.current = !wide && e.touches.length === 1 && t ? { x: t.clientX, y: t.clientY, horizontal: null, dx: 0 } : null;
+        if (elRef.current) elRef.current.style.transition = "none";
+      },
+      onTouchMove: (e) => {
+        const st = swipeState.current;
+        const t = e.touches[0];
+        if (!st || !t) return;
+        const dx = t.clientX - st.x;
+        const dy = t.clientY - st.y;
+        if (st.horizontal === null) {
+          if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+          st.horizontal = Math.abs(dx) > Math.abs(dy) * 1.2;
+        }
+        if (!st.horizontal) return; // gerakan menggulir tegak lurus: biarkan
+        st.dx = dx;
+        const el = elRef.current;
+        if (!el) return;
+        const pull = dx * sign > 0 ? Math.abs(dx) : 0; // hanya arah yang berlaku yang ikut bergerak
+        el.style.transform = pull ? `translateX(${dx * 0.6}px)` : "";
+        el.style.opacity = pull ? String(Math.max(0.55, 1 - pull / 350)) : "";
+      },
+      onTouchEnd: () => {
+        const st = swipeState.current;
+        swipeState.current = null;
+        if (!st) return;
+        if (st.horizontal && st.dx * sign > 60) {
+          reset(false); // panel disembunyikan; panel tujuan masuk dengan animasi sendiri
+          onCommit();
+        } else {
+          reset(true);
+        }
+      },
+      onTouchCancel: () => {
+        swipeState.current = null;
+        reset(true);
+      },
+    };
+  }
+
+  const coverSwipe = swipeHandlers(coverBoxRef, -1, () => goView("lirik"));
+  const lyricsSwipe = swipeHandlers(boxRef, 1, () => goView("cover"), holdAutoScroll);
+
   return (
     <div
       ref={rootRef}
@@ -420,7 +488,7 @@ export default function FullPlayer() {
                   role="tab"
                   key={t.id}
                   aria-selected={view === t.id}
-                  onClick={() => setView(t.id)}
+                  onClick={() => goView(t.id)}
                   className={`flex-1 rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
                     view === t.id ? "bg-signal-500 text-ink-950" : "text-white/60 hover:text-white"
                   }`}
@@ -551,25 +619,11 @@ export default function FullPlayer() {
 
         <div className="flex min-h-0 flex-1 flex-col md:flex-row md:items-stretch md:gap-12 md:px-10 md:py-6">
           <div
-            onTouchStart={(e) => {
-              const t = e.touches[0];
-              swipeStart.current = e.touches.length === 1 && t ? { x: t.clientX, y: t.clientY } : null;
-            }}
-            onTouchEnd={(e) => {
-              const st = swipeStart.current;
-              swipeStart.current = null;
-              const t = e.changedTouches[0];
-              if (!st || !t) return;
-              const dx = t.clientX - st.x;
-              const dy = t.clientY - st.y;
-              if (dx > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setView("lirik");
-            }}
-            onTouchCancel={() => {
-              swipeStart.current = null;
-            }}
+            ref={coverBoxRef}
+            {...coverSwipe}
             className={`min-h-0 flex-1 touch-pan-y items-center justify-center py-4 md:flex md:flex-none md:basis-[42%] md:p-0 ${
               coverStyle === "square" ? "px-6" : "px-8"
-            } ${view === "cover" ? "flex" : "hidden"}`}
+            } ${view === "cover" ? "flex" : "hidden"} ${viewAnim === "to-cover" ? "fp-in-from-left" : ""}`}
           >
             {coverStyle === "vinyl" ? (
               <div className="fp-vinyl fp-cover fp-cover-size" data-playing={isPlaying ? "true" : "false"}>
@@ -644,25 +698,8 @@ export default function FullPlayer() {
             ref={boxRef}
             className={`fp-lyrics relative mt-3 min-h-0 flex-1 touch-pan-y overflow-y-auto px-6 md:mt-0 md:block md:px-2 ${
               view === "lirik" ? "block" : "hidden"
-            }`}
-            onTouchStart={(e) => {
-              holdAutoScroll(e);
-              const t = e.touches[0];
-              swipeStart.current = e.touches.length === 1 && t ? { x: t.clientX, y: t.clientY } : null;
-            }}
-            onTouchEnd={(e) => {
-              // Geser ke kiri di Lirik = kembali ke Cover (pasangan dari geser kanan di Cover).
-              const st = swipeStart.current;
-              swipeStart.current = null;
-              const t = e.changedTouches[0];
-              if (!st || !t) return;
-              const dx = t.clientX - st.x;
-              const dy = t.clientY - st.y;
-              if (dx < -60 && Math.abs(dx) > Math.abs(dy) * 1.5) setView("cover");
-            }}
-            onTouchCancel={() => {
-              swipeStart.current = null;
-            }}
+            } ${viewAnim === "to-lirik" ? "fp-in-from-right" : ""}`}
+            {...lyricsSwipe}
             onWheel={holdAutoScroll}
             onPointerDown={holdAutoScroll}
           >
