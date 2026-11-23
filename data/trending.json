@@ -13,7 +13,39 @@
     "cover": "https://contoh.com/cover-album.jpg"
   },
   "sections": [
-    { "title": "Lagu trending", "items": [] },
-    { "title": "Rekomendasi", "items": [] }
+    {
+      "title": "Lagu trending",
+      "items": []
+    },
+    {
+      "title": "Rekomendasi",
+      "items": [
+        {
+          "title": "Olivia Rodrigo - the cure",
+          "artist": "Olivia Rodrigo",
+          "cover": "https://i.scdn.co/image/ab67616d0000b2735cf234eeb7a2edf44bf64a46"
+        },
+        {
+          "title": "Bleachers - Merry Christmas, Please Don't Call",
+          "artist": "Bleachers",
+          "cover": "https://i.scdn.co/image/ab67616d0000b2737fbed05d7226834da74c652b"
+        },
+        {
+          "title": "Alex Crichton - What If I Call",
+          "artist": "Alex Crichton",
+          "cover": "https://i.scdn.co/image/ab67616d0000b27354eb62b85844cd19c533d245"
+        },
+        {
+          "title": "Taylor Swift - Style",
+          "artist": "Taylor Swift",
+          "cover": "https://i.scdn.co/image/ab67616d0000b2739abdf14e6058bd3903686148"
+        },
+        {
+          "title": "NIKI - Backburner",
+          "artist": "NIKI",
+          "cover": "https://i.scdn.co/image/ab67616d0000b27389aa3d00d339b8948374782b"
+        }
+      ]
+    }
   ]
 }
