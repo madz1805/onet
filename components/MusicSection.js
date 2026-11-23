@@ -602,7 +602,7 @@ export default function MusicSection() {
 
       {tab === "cari" && history.length > 0 && (
         <CardRow
-          title="Riwayat pencarian"
+          title="Riwayat"
           count={history.length}
           hint={sections.length === 0 ? HINT : undefined}
         >
