@@ -169,13 +169,13 @@ function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disab
             draggable={false}
             referrerPolicy="no-referrer"
             loading="lazy"
-            className={`aspect-square w-full rounded-xl border object-cover ${
+            className={`aspect-square w-full rounded-none border-2 object-cover ${
               active ? "border-signal-500" : "border-white/10"
             } ${disabled && !busy ? "opacity-50" : ""}`}
           />
         ) : (
           <span
-            className={`grid aspect-square w-full place-items-center rounded-xl border bg-ink-800/70 text-white/30 ${
+            className={`grid aspect-square w-full place-items-center rounded-none border-2 bg-ink-800/70 text-white/30 ${
               active ? "border-signal-500" : "border-white/10"
             }`}
           >
@@ -183,7 +183,7 @@ function Card({ cover, title, subtitle, onPlay, onLongPress, busy, active, disab
           </span>
         )}
         {busy && (
-          <span className="absolute inset-0 grid place-items-center rounded-xl bg-black/50 text-white">
+          <span className="absolute inset-0 grid place-items-center rounded-none bg-black/50 text-white">
             <Loader2 size={22} className="animate-spin" />
           </span>
         )}
