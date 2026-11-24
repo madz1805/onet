@@ -114,7 +114,7 @@ body {
      terbesar, saat address bar sudah hilang) + bonus 12vh, jadi ukurannya
      tidak ikut mengecil/membesar waktu address bar berubah. */
 html[data-theme="glass"] {
-  background-color: rgb(var(--ink-950));
+  background-color: #08090c;
 }
 html[data-theme="glass"] body {
   background: transparent !important;
@@ -138,14 +138,13 @@ html[data-theme="glass"]::after,
 html[data-theme="glass"]::before {
   content: "";
   z-index: -20;
-  /* Latar gelap berdegradasi (hitam kebiruan -> indigo -> ungu tua) dengan sorot
-     lembut ungu/biru/magenta. Gelap supaya kartu kaca (putih transparan + tepi
-     terang) tampil jelas, dan ada sesuatu yang "dibiaskan" di belakangnya. */
+  /* Hitam doff (matte) dengan degradasi sangat halus dan dua sorot ungu/biru yang
+     nyaris tak terlihat, seperti latar aplikasi musik gelap. Dibuat netral supaya
+     kartu kaca (putih transparan + tepi terang) tampil jelas di atasnya. */
   background-image:
-    radial-gradient(circle at 80% 22%, rgba(139, 92, 246, 0.50), transparent 46%),
-    radial-gradient(circle at 10% 64%, rgba(59, 130, 246, 0.38), transparent 46%),
-    radial-gradient(circle at 92% 90%, rgba(236, 72, 153, 0.30), transparent 42%),
-    linear-gradient(155deg, #04050d 0%, #0a0f2e 26%, #15104a 52%, #230f5c 74%, #0c1b46 100%);
+    radial-gradient(circle at 84% 18%, rgba(139, 92, 246, 0.14), transparent 46%),
+    radial-gradient(circle at 8% 6%, rgba(80, 100, 200, 0.10), transparent 42%),
+    linear-gradient(180deg, #12141c 0%, #0c0d12 55%, #08090c 100%);
 }
 /* Bola-bola kaca transparan besar di latar (seperti di referensi) — tepinya
    sedikit lebih terang supaya terlihat seperti bola kaca. Hanya tampil di
@@ -153,10 +152,8 @@ html[data-theme="glass"]::before {
 html[data-theme="glass"]::after {
   content: "";
   z-index: -15;
-  background-image:
-    radial-gradient(circle min(56vw, 360px) at 104% 0%, rgba(120, 110, 255, 0.30) 0%, rgba(110, 100, 240, 0.20) 64%, rgba(255, 255, 255, 0.22) 68.5%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(circle min(70vw, 440px) at -14% 84%, rgba(90, 140, 255, 0.26) 0%, rgba(90, 120, 255, 0.16) 64%, rgba(255, 255, 255, 0.20) 68.5%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(circle min(46vw, 300px) at 112% 68%, rgba(236, 72, 153, 0.26) 0%, rgba(220, 80, 160, 0.16) 64%, rgba(255, 255, 255, 0.18) 68.5%, rgba(255, 255, 255, 0) 72%);
+  /* Bola kaca di latar dimatikan: latar dibuat hitam doff polos. */
+  background-image: none;
 }
 .site-bg-layer {
   z-index: -10;
@@ -228,10 +225,10 @@ html[data-theme="glass"]:has(.site-bg-layer) :is([class*="bg-ink-900"], [class*=
 [data-theme="glass"] input[class*="bg-ink-"]:not(.glass-surface-solid),
 [data-theme="glass"] textarea[class*="bg-ink-"]:not(.glass-surface-solid),
 [data-theme="glass"] select[class*="bg-ink-"]:not(.glass-surface-solid) {
-  background-color: rgb(20 14 70 / 0.22) !important;
+  background-color: rgb(0 0 0 / 0.28) !important;
   background-image: none;
   border-color: rgb(255 255 255 / 0.30) !important;
-  box-shadow: inset 0 2px 6px rgb(20 10 80 / 0.25) !important;
+  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.35) !important;
 }
 /* Border putih tipis dipertegas dikit biar kelihatan seperti tepi kaca. */
 [data-theme="glass"] [class*="border-white"] {
@@ -259,8 +256,8 @@ html[data-theme="glass"]:has(.site-bg-layer) :is([class*="bg-ink-900"], [class*=
 [data-theme="glass"] .glass-surface-solid {
   background-color: rgb(255 255 255 / 0.17) !important;
   background-image:
-    linear-gradient(135deg, rgb(255 255 255 / 0.26), rgb(255 255 255 / 0.05) 62%),
-    linear-gradient(rgb(40 28 130 / 0.30), rgb(40 28 130 / 0.30));
+    linear-gradient(135deg, rgb(255 255 255 / 0.20), rgb(255 255 255 / 0.04) 62%),
+    linear-gradient(rgb(8 10 18 / 0.42), rgb(8 10 18 / 0.42));
   /* Dulu blur 34px + saturate 180%. Dikecilkan karena mini player (melayang di atas
      halaman yang di-scroll) memakai kelas ini juga. */
   backdrop-filter: blur(20px) saturate(150%);
@@ -269,7 +266,7 @@ html[data-theme="glass"]:has(.site-bg-layer) :is([class*="bg-ink-900"], [class*=
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.60),
     inset 0 -1px 0 rgb(255 255 255 / 0.10),
-    0 18px 50px rgb(20 12 90 / 0.38) !important;
+    0 18px 50px rgb(0 0 0 / 0.50) !important;
 }
 /* Menu tema (dropdown di dalam header): dibuat hampir pekat. Header sendiri
    sudah memakai backdrop-filter, dan browser tidak mem-blur "kaca di dalam
