@@ -270,7 +270,7 @@
 }
 /* --- Jarum piringan -------------------------------------------------------
    SVG menumpuk di atas piringan (tidak ikut berputar). Pangkalnya di pojok
-   kanan atas; lengannya berayun pada pangkal itu: menempel di alur saat lagu
+   kanan atas (di luar tepi piringan); lengannya berayun pada pangkal itu: menempel di alur saat lagu
    diputar, terangkat ke samping (di luar piringan) saat dijeda. */
 .fp-tonearm {
   position: absolute;
@@ -283,7 +283,7 @@
 }
 .fp-tonearm-arm {
   transform-box: view-box;
-  transform-origin: 88% 12%;
+  transform-origin: 90% 5%;
   transform: rotate(-18deg);
   transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
