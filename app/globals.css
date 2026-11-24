@@ -138,14 +138,14 @@ html[data-theme="glass"]::after,
 html[data-theme="glass"]::before {
   content: "";
   z-index: -20;
-  /* Latar mirip kaca sungguhan: biru tua di kiri-atas -> periwinkle -> lavender
-     -> pink -> oranye di kanan-bawah, dengan sorot lembut supaya kaca punya
-     sesuatu yang "dibiaskan" di belakangnya. */
+  /* Latar gelap berdegradasi (hitam kebiruan -> indigo -> ungu tua) dengan sorot
+     lembut ungu/biru/magenta. Gelap supaya kartu kaca (putih transparan + tepi
+     terang) tampil jelas, dan ada sesuatu yang "dibiaskan" di belakangnya. */
   background-image:
-    radial-gradient(circle at 78% 30%, rgba(214, 170, 255, 0.55), transparent 46%),
-    radial-gradient(circle at 12% 62%, rgba(120, 150, 255, 0.45), transparent 44%),
-    radial-gradient(circle at 92% 88%, rgba(255, 190, 90, 0.55), transparent 42%),
-    linear-gradient(155deg, #123a9c 0%, #3f63d8 22%, #7a7fe6 42%, #b48ee6 58%, #f07fb0 78%, #ffa45a 100%);
+    radial-gradient(circle at 80% 22%, rgba(139, 92, 246, 0.50), transparent 46%),
+    radial-gradient(circle at 10% 64%, rgba(59, 130, 246, 0.38), transparent 46%),
+    radial-gradient(circle at 92% 90%, rgba(236, 72, 153, 0.30), transparent 42%),
+    linear-gradient(155deg, #04050d 0%, #0a0f2e 26%, #15104a 52%, #230f5c 74%, #0c1b46 100%);
 }
 /* Bola-bola kaca transparan besar di latar (seperti di referensi) — tepinya
    sedikit lebih terang supaya terlihat seperti bola kaca. Hanya tampil di
@@ -154,9 +154,9 @@ html[data-theme="glass"]::after {
   content: "";
   z-index: -15;
   background-image:
-    radial-gradient(circle min(56vw, 360px) at 104% 0%, rgba(150, 180, 255, 0.55) 0%, rgba(150, 165, 255, 0.40) 64%, rgba(255, 255, 255, 0.42) 68.5%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(circle min(70vw, 440px) at -14% 84%, rgba(205, 210, 255, 0.42) 0%, rgba(190, 190, 255, 0.28) 64%, rgba(255, 255, 255, 0.36) 68.5%, rgba(255, 255, 255, 0) 72%),
-    radial-gradient(circle min(46vw, 300px) at 112% 68%, rgba(255, 175, 100, 0.40) 0%, rgba(255, 160, 110, 0.26) 64%, rgba(255, 255, 255, 0.30) 68.5%, rgba(255, 255, 255, 0) 72%);
+    radial-gradient(circle min(56vw, 360px) at 104% 0%, rgba(120, 110, 255, 0.30) 0%, rgba(110, 100, 240, 0.20) 64%, rgba(255, 255, 255, 0.22) 68.5%, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(circle min(70vw, 440px) at -14% 84%, rgba(90, 140, 255, 0.26) 0%, rgba(90, 120, 255, 0.16) 64%, rgba(255, 255, 255, 0.20) 68.5%, rgba(255, 255, 255, 0) 72%),
+    radial-gradient(circle min(46vw, 300px) at 112% 68%, rgba(236, 72, 153, 0.26) 0%, rgba(220, 80, 160, 0.16) 64%, rgba(255, 255, 255, 0.18) 68.5%, rgba(255, 255, 255, 0) 72%);
 }
 .site-bg-layer {
   z-index: -10;
@@ -210,7 +210,7 @@ html[data-theme="glass"]:has(.site-bg-layer) :is([class*="bg-ink-900"], [class*=
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.55),
     inset 0 -1px 0 rgb(255 255 255 / 0.10),
-    0 10px 34px rgb(28 20 110 / 0.28) !important;
+    0 10px 34px rgb(0 0 0 / 0.40) !important;
 }
 /* Header & footer: kaca lebar penuh dengan garis terang tipis. */
 [data-theme="glass"] header[class*="bg-ink-"],
