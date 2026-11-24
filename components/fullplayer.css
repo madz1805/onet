@@ -542,11 +542,13 @@
     transform: none;
   }
 }
+/* Tanpa fill-mode "both"/"forwards": kalau tidak, keyframe terakhir terus menimpa gaya inline
+   (transform/opacity) yang dipakai saat panel mengikuti jari, jadi geseran berikutnya tidak bergerak. */
 .fp-in-from-right {
-  animation: fp-in-from-right 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fp-in-from-right 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .fp-in-from-left {
-  animation: fp-in-from-left 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fp-in-from-left 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (min-width: 768px), (prefers-reduced-motion: reduce) {
   .fp-in-from-right,
