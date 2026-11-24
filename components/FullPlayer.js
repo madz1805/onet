@@ -641,19 +641,19 @@ export default function FullPlayer() {
                 {/* Jarum piringan: turun ke piringan saat lagu diputar, naik menjauh saat dijeda. */}
                 <svg className="fp-tonearm" viewBox="0 0 100 100" aria-hidden="true">
                   <g className="fp-tonearm-arm">
-                    <g transform="translate(88 12) rotate(-60)">
-                      <rect x="2" y="-1.7" width="9" height="3.4" rx="0.9" fill="#85858d" stroke="#0b0b0c" strokeWidth="0.5" />
-                      <rect x="8" y="-1.7" width="3" height="3.4" rx="0.9" fill="#c9c9cf" />
+                    <g transform="translate(90 5) rotate(-50)">
+                      <rect x="2" y="-1.7" width="7" height="3.4" rx="0.9" fill="#85858d" stroke="#0b0b0c" strokeWidth="0.5" />
+                      <rect x="6.5" y="-1.7" width="2.5" height="3.4" rx="0.9" fill="#c9c9cf" />
                     </g>
                     <path
-                      d="M88 12 C93 30 96 55 86 70 C82 76 78 79 74.5 80.5"
+                      d="M90 5 C94 28 97 56 86 70 C82 76 78 79 74.5 80.5"
                       fill="none"
                       stroke="#0b0b0c"
                       strokeWidth="2.8"
                       strokeLinecap="round"
                     />
                     <path
-                      d="M88 12 C93 30 96 55 86 70 C82 76 78 79 74.5 80.5"
+                      d="M90 5 C94 28 97 56 86 70 C82 76 78 79 74.5 80.5"
                       fill="none"
                       stroke="#d2d2d8"
                       strokeWidth="1.6"
@@ -665,10 +665,10 @@ export default function FullPlayer() {
                       <circle cx="7.4" cy="0" r="0.8" fill="#f2f2f5" />
                     </g>
                   </g>
-                  <circle cx="88" cy="12" r="7.2" fill="#1c1c20" stroke="rgb(255 255 255 / 0.14)" strokeWidth="0.5" />
-                  <circle cx="88" cy="12" r="4.8" fill="#9a9aa2" />
-                  <circle cx="88" cy="12" r="3.5" fill="#121214" />
-                  <circle cx="88" cy="12" r="1.7" fill="#d6d6dc" />
+                  <circle cx="90" cy="5" r="7.2" fill="#1c1c20" stroke="rgb(255 255 255 / 0.14)" strokeWidth="0.5" />
+                  <circle cx="90" cy="5" r="4.8" fill="#9a9aa2" />
+                  <circle cx="90" cy="5" r="3.5" fill="#121214" />
+                  <circle cx="90" cy="5" r="1.7" fill="#d6d6dc" />
                 </svg>
               </div>
             ) : track.thumbnail ? (
