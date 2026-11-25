@@ -324,7 +324,13 @@ export async function POST(req) {
           if (!res.status) {
             throw new Error(res.error || "Scraper Instagram gagal memproses link ini.");
           }
-          return normalizeInstagramScraperResult(res.result);
+          const normalized = normalizeInstagramScraperResult(res.result);
+          // Scraper bisa "berhasil" tapi isinya kosong (IG memblokir IP server dan mengirim
+          // halaman tanpa data). Itu harus dianggap gagal supaya pindah ke endpoint cadangan.
+          if (!normalized.media.length) {
+            throw new Error("Scraper Instagram tidak menemukan media (halaman kosong / diblokir).");
+          }
+          return normalized;
         };
 
         // 2) Kalau scraper gagal (link diblokir, struktur halaman IG
@@ -362,6 +368,12 @@ export async function POST(req) {
           console.error("[instagram] scraper gagal, pakai endpoint cadangan:", err.message);
           return tryEndpoint();
         });
+
+        // Cadangan pun kosong: lempar error supaya pengguna dapat pesan yang jelas dan
+        // kegagalannya terkirim ke log Telegram (sebelumnya lolos sebagai "sukses" tanpa media).
+        if (!result.media?.length) {
+          throw new Error("Instagram: scraper dan endpoint cadangan sama-sama tidak mengembalikan media.");
+        }
 
         return succeed(platform, result);
       }
