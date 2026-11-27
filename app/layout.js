@@ -1,7 +1,7 @@
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import SiteBackground from "@/components/SiteBackground";
 import SplashLoader from "@/components/SplashLoader";
 import ChannelPromo from "@/components/ChannelPromo";
@@ -143,6 +143,7 @@ export default function RootLayout({ children }) {
           saat itu, jadi tidak ada ruang ekstra yang nongol belakangan. */}
       <body className="font-body bg-ink-950 bg-grain min-h-dvh">
         <SplashLoader />
+        <ServiceWorkerRegister />
         <SiteBackground />
         {/* Pop up ajakan gabung saluran WhatsApp: muncul setelah splash loader selesai. */}
         <ChannelPromo />
@@ -152,7 +153,6 @@ export default function RootLayout({ children }) {
           <Navbar />
           <MiniPlayer />
           <main className="min-h-[calc(100dvh-64px)]">{children}</main>
-          <Footer />
           {/* Ruang kosong di HP supaya bagian paling bawah halaman tidak tertutup tab bar mengambang. */}
           <div className="h-24 md:hidden" aria-hidden="true" />
           <BottomTabBar />
