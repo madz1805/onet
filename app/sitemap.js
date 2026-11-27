@@ -10,5 +10,6 @@ export default function sitemap() {
     { url: `${SITE_URL}/kebijakan`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${SITE_URL}/chat`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/dukungan`, lastModified: now, changeFrequency: "monthly", priority: 0.4 },
+    { url: `${SITE_URL}/dev`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
   ];
 }
