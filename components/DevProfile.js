@@ -39,7 +39,7 @@ export default function DevProfile() {
       {/* Banner video + foto profil + nama */}
       <section
         aria-label={`Profil ${DEV_NAME}`}
-        className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-white/10 bg-ink-900 shadow-glow"
+        className="relative aspect-square overflow-hidden rounded-3xl border border-white/10 bg-ink-900 shadow-glow"
       >
         <video
           src={DEV_BANNER_VIDEO}
@@ -51,7 +51,15 @@ export default function DevProfile() {
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+        {/* Gradasi gelap di bagian bawah supaya nama & foto profil selalu jelas,
+            apa pun isi videonya. Video 16:9 otomatis terpotong rapi di tengah (object-cover). */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(8,14,11,0.96) 0%, rgba(8,14,11,0.85) 30%, rgba(8,14,11,0.5) 60%, rgba(8,14,11,0) 100%)",
+          }}
+        />
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
           <h1 className="font-display text-3xl font-semibold leading-tight text-white" style={{ color: "#fff" }}>
             {DEV_NAME}
