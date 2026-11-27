@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, X, Download, Wand2, Music2, Bot, Heart, Mail, FileText } from "lucide-react";
+import { Menu, X, Download, Wand2, Music2, Bot, Heart, Mail, FileText, Code2 } from "lucide-react";
+import InstallApp from "@/components/InstallApp";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import NotificationBell from "@/components/NotificationBell";
 import { SITE_NAME, SITE_LOGO } from "@/lib/site";
@@ -23,6 +24,7 @@ const LINKS = [
 const MENU_LINKS = [
   { href: "/dukungan", label: "Dukungan", icon: Heart },
   { href: "/kebijakan#syarat", label: "Syarat & Ketentuan", icon: FileText },
+  { href: "/dev", label: "Dev", icon: Code2 },
 ];
 
 export default function Navbar() {
@@ -147,6 +149,8 @@ export default function Navbar() {
               </Link>
             );
           })}
+          {/* Tombol pasang aplikasi (PWA): tampil hanya kalau browser mendukung. */}
+          <InstallApp variant="menu" />
         </nav>
       </aside>
     </div>
