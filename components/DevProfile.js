@@ -24,13 +24,24 @@ function TikTokIcon({ size = 20 }) {
   );
 }
 
+// Ambil username dari URL profil (t.me/xxx, tiktok.com/@xxx) supaya teks kecil di
+// tombol otomatis ikut URL yang kamu isi di lib/site.js.
+function handleFromUrl(url) {
+  try {
+    const last = new URL(url).pathname.split("/").filter(Boolean).pop() || "";
+    return last ? (last.startsWith("@") ? last : `@${last}`) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Warna ikon tiap tombol (dipakai di semua tema; tetap terbaca karena latar pastel).
 const LINKS = [
   { label: "Email", sub: DEV_EMAIL, href: `mailto:${DEV_EMAIL}`, icon: Mail, color: "#FFD60A", external: false },
   { label: "Instagram", sub: DEV_INSTAGRAM_HANDLE, href: DEV_INSTAGRAM_URL, icon: Instagram, color: "#F5B8D0", external: true },
-  { label: "Saluran KOYEN", href: WHATSAPP_CHANNEL_URL, icon: WhatsAppIcon, color: "#9FE3C8", external: true },
-  { label: "Telegram", href: DEV_TELEGRAM_URL, icon: Send, color: "#AFCBF5", external: true },
-  { label: "TikTok", href: DEV_TIKTOK_URL, icon: TikTokIcon, color: "#C9B6FF", external: true },
+  { label: "Saluran", sub: `${SITE_NAME} WEB`, href: WHATSAPP_CHANNEL_URL, icon: WhatsAppIcon, color: "#9FE3C8", external: true },
+  { label: "Telegram", sub: handleFromUrl(DEV_TELEGRAM_URL), href: DEV_TELEGRAM_URL, icon: Send, color: "#AFCBF5", external: true },
+  { label: "TikTok", sub: handleFromUrl(DEV_TIKTOK_URL), href: DEV_TIKTOK_URL, icon: TikTokIcon, color: "#C9B6FF", external: true },
 ];
 
 export default function DevProfile() {
