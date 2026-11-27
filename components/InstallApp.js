@@ -3,21 +3,17 @@
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 
-// Mendaftarkan service worker (PWA) dan menampilkan tombol "Pasang aplikasi".
+// Menampilkan tombol "Pasang aplikasi" (service worker didaftarkan di ServiceWorkerRegister).
 // - Android/Chrome: tombol memicu dialog pemasangan bawaan browser.
 // - iPhone/Safari: tidak ada dialog, jadi ditampilkan petunjuk singkat.
 // - Tidak tampil kalau web sudah dibuka sebagai aplikasi terpasang.
-export default function InstallApp() {
+export default function InstallApp({ variant = "button" }) {
   const [deferred, setDeferred] = useState(null);
   const [isIos, setIsIos] = useState(false);
   const [installed, setInstalled] = useState(true); // sembunyikan sampai dicek
   const [showIosHelp, setShowIosHelp] = useState(false);
 
   useEffect(() => {
-    if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
-    }
-
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
     setInstalled(standalone);
@@ -53,18 +49,24 @@ export default function InstallApp() {
     }
   }
 
+  const isMenu = variant === "menu";
+
   return (
-    <div className="mt-4">
+    <div className={isMenu ? "" : "mt-4"}>
       <button
         type="button"
         onClick={handleClick}
-        className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+        className={
+          isMenu
+            ? "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-base font-medium text-white/80 hover:bg-white/5 focus-ring"
+            : "inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+        }
       >
-        <Download size={16} />
+        <Download size={isMenu ? 20 : 16} />
         Pasang aplikasi
       </button>
       {showIosHelp && (
-        <p className="mt-2 max-w-xs text-xs leading-relaxed text-white/50">
+        <p className={`text-xs leading-relaxed text-white/50 ${isMenu ? "px-3 pb-2" : "mt-2 max-w-xs"}`}>
           Di iPhone: ketuk ikon Bagikan di Safari, lalu pilih &quot;Tambah ke Layar Utama&quot;.
         </p>
       )}
